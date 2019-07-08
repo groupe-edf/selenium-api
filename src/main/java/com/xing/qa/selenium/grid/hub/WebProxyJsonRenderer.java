@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -35,23 +36,21 @@ public class WebProxyJsonRenderer implements JSONRenderer {
     @Override
     public JSONObject render() throws JSONException {
         JSONObject json = new JSONObject();
-        Map<String, Object> status = proxy.getProxyStatus();
-        JSONObject statusJson = new JSONObject(proxy.getProxyStatus());
+        JSONObject status = new JSONObject(proxy.getProxyStatus());
+        JSONObject value = status.getJSONObject("value");
         json.put("class", proxy.getClass().getSimpleName());
 
         try {
-            
-            json.put("version", statusJson.getJSONObject("value").getJSONObject("build").getString("version"));
+            JSONObject build = value.getJSONObject("build");
+            json.put("version", build.getString("version"));
         } catch (JSONException e) {
             json.put("version", "unknown");
             json.put("error", e.getMessage());
             json.put("trace", e.getStackTrace());
             e.printStackTrace();
         }
-
-        JSONObject osJson = statusJson.getJSONObject("value").getJSONObject("java").getJSONObject("os");
-        json.put("os", osJson);
-        json.put("java", statusJson.getJSONObject("value").getJSONObject("java"));
+        json.put("os", value.get("os"));
+        json.put("java", value.get("java"));
         json.put("configuration", proxy.getConfig());
 
         SlotsLines rcLines = new SlotsLines();
