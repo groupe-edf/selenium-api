@@ -1,13 +1,12 @@
 package com.xing.qa.selenium.grid.node;
 
-import org.influxdb.InfluxDB;
-import org.influxdb.dto.Serie;
-import org.openqa.grid.internal.ExternalSessionKey;
-import org.openqa.grid.internal.TestSession;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDB.ConsistencyLevel;
+import org.influxdb.dto.BatchPoints;
+import org.influxdb.dto.Point;
 
 /**
  * BaseSeleniumReporter
@@ -32,13 +31,15 @@ public abstract class BaseSeleniumReporter implements Runnable {
         try {
             report();
         } catch (Exception e) {
-            log.warning(e.getMessage());
+            log.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
     protected abstract void report();
 
-    protected void write(TimeUnit precision, Serie... series) {
-        influxdb.write(database, precision, series);
+    protected void write(Point... points) {
+        BatchPoints batchPoints = BatchPoints.database(database).points(points).retentionPolicy("default")
+                .consistency(ConsistencyLevel.ANY).build();
+        influxdb.write(batchPoints);
     }
 }

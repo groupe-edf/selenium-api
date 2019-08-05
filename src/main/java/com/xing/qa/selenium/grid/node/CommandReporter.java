@@ -1,12 +1,13 @@
 package com.xing.qa.selenium.grid.node;
 
-import org.influxdb.InfluxDB;
-import org.influxdb.dto.Serie;
-import org.openqa.grid.internal.ExternalSessionKey;
-import org.openqa.grid.internal.TestSession;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.concurrent.TimeUnit;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.dto.Point;
+import org.openqa.grid.internal.ExternalSessionKey;
+import org.openqa.grid.internal.TestSession;
 
 /**
  * CommandReporter
@@ -20,7 +21,8 @@ class CommandReporter extends BaseSeleniumReporter {
     protected final HttpServletResponse response;
     protected final ReportType type;
 
-    public CommandReporter(String remoteHostName, InfluxDB influxdb, String database, TestSession session, ContentSnoopingRequest request, HttpServletResponse response, ReportType type) {
+    public CommandReporter(String remoteHostName, InfluxDB influxdb, String database, TestSession session,
+            ContentSnoopingRequest request, HttpServletResponse response, ReportType type) {
         super(remoteHostName, influxdb, database);
         this.type = type;
         this.request = request;
@@ -35,33 +37,12 @@ class CommandReporter extends BaseSeleniumReporter {
             sessionKey = esk.getKey();
         }
 
-        Serie s = new Serie.Builder(String.format("session.cmd.%s.measure", type))
-                .columns(
-                        "time",
-                        "host",
-                        "ext_key",
-                        "int_key",
-                        "forwarding",
-                        "orphaned",
-                        "inactivity",
-                        "cmd_method",
-                        "cmd_action",
-                        "cmd"
-                )
-                .values(
-                        System.currentTimeMillis(),
-                        remoteHostName,
-                        sessionKey,
-                        session.getInternalKey(),
-                        session.isForwardingRequest(),
-                        session.isOrphaned(),
-                        session.getInactivityTime(),
-                        request.getMethod(),
-                        request.getPathInfo(),
-                        request.getContent()
-                )
-                .build();
+        Point point = Point.measurement("disk").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+                .field("host", remoteHostName).field("ext_key", sessionKey).field("int_key", session.getInternalKey())
+                .field("forwarding", session.isForwardingRequest()).field("orphaned", session.isOrphaned())
+                .field("inactivity", session.getInactivityTime()).field("cmd_method", request.getMethod())
+                .field("cmd_action", request.getPathInfo()).field("cmd", request.getContent()).build();
 
-        write(TimeUnit.MILLISECONDS, s);
+        write(point);
     }
 }

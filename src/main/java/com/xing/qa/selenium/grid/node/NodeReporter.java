@@ -1,9 +1,10 @@
 package com.xing.qa.selenium.grid.node;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import org.influxdb.InfluxDB;
-import org.influxdb.dto.Serie;
+import org.influxdb.dto.Point;
 
 /**
 * NodeReporter
@@ -21,22 +22,11 @@ class NodeReporter extends BaseSeleniumReporter {
 
     @Override
     protected void report() {
-        log.finer(String.format("Reporting: node.%s.measure", SerieNames.utilization));
+        log.log(Level.INFO, String.format("Reporting: node.%s.measure", SerieNames.utilization));
 
-        Serie load = new Serie.Builder(String.format("node.%s.measure", SerieNames.utilization))
-                .columns(
-                        "time",
-                        "host",
-                        "used",
-                        "total",
-                        "normalized"
-                ).values(
-                        System.currentTimeMillis(),
-                        remoteHostName,
-                        proxy.getTotalUsed(),
-                        proxy.getMaxNumberOfConcurrentTestSessions(),
-                        proxy.getResourceUsageInPercent()
-                ).build();
-        write(TimeUnit.MILLISECONDS, load);
+        Point point = Point.measurement("disk").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+                .field("host", remoteHostName).field("used", proxy.getTotalUsed()).field("total", proxy.getMaxNumberOfConcurrentTestSessions())
+                .field("normalized", proxy.getResourceUsageInPercent()).build();
+        write(point);
     }
 }

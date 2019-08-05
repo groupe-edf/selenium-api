@@ -1,12 +1,10 @@
 package com.xing.qa.selenium.grid.node;
 
-import org.influxdb.InfluxDB;
-import org.influxdb.dto.Serie;
-import org.openqa.grid.common.exception.RemoteException;
-import org.openqa.grid.internal.TestSession;
-
-import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.TimeUnit;
+
+import org.influxdb.InfluxDB;
+import org.influxdb.dto.Point;
+import org.openqa.grid.common.exception.RemoteException;
 
 /**
 * ErrorReporter
@@ -24,20 +22,9 @@ class ErrorReporter extends BaseSeleniumReporter {
 
     @Override
     protected void report() {
-        Serie exRep = new Serie.Builder("node.errors")
-                .columns(
-                        "time",
-                        "host",
-                        "error",
-                        "message"
-                )
-                .values(
-                        System.currentTimeMillis(),
-                        remoteHostName,
-                        exception.getClass().getName(),
-                        exception.getMessage()
-                ).build();
-        write(TimeUnit.MILLISECONDS, exRep);
+        Point point = Point.measurement("disk").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+                .field("host", remoteHostName).field("error", exception.getClass().getName()).field("message", exception.getMessage()).build();
+        write(point);
     }
 
 }
