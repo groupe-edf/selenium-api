@@ -1,5 +1,7 @@
 package com.xing.qa.selenium.grid.node;
 
+import java.nio.channels.SeekableByteChannel;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -37,12 +39,12 @@ class CommandReporter extends BaseSeleniumReporter {
         if (esk != null) {
             sessionKey = esk.getKey();
         }
-        log.log(Level.INFO, String.format((String.format("session.cmd.%s.measure",type)), SerieNames.command));
+        log.log(Level.INFO, String.format((String.format("session.cmd.%s.measure",type)), SerieNames.command));    
         Point point = Point.measurement(String.format("session.cmd.%s.measure",type)).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
-                .field("host", remoteHostName).field("ext_key", sessionKey).field("int_key", session.getInternalKey())
-                .field("forwarding", session.isForwardingRequest()).field("orphaned", session.isOrphaned())
-                .field("inactivity", session.getInactivityTime()).field("cmd_method", request.getMethod())
-                .field("cmd_action", request.getPathInfo()).field("cmd", request.getContent()).build();
+                .field("host", Objects.toString(remoteHostName,"")).field("ext_key",Objects.toString(sessionKey, "")).field("int_key", Objects.toString(session.getInternalKey(),""))
+                .field("forwarding", Objects.toString(session.isForwardingRequest(),"")).field("orphaned", Objects.toString(session.isOrphaned(),""))
+                .field("inactivity", Objects.toString(session.getInactivityTime(),"")).field("cmd_method", Objects.toString(request.getMethod(),""))
+                .field("cmd_action", Objects.toString(request.getPathInfo(),"")).field("cmd", Objects.toString(request.getContent(), "")).build();
 
         write(point);
     }
