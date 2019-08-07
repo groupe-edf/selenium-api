@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
@@ -72,6 +73,9 @@ class SessionReporter extends BaseSeleniumReporter {
                     .field("orphaned", orphaned).field("inactivity", inactivityTime).field("capability", scap.getKey())
                     .field("val", scap.getValue());
         }
+        log.log(Level.INFO, String.format("session.event.measuree", type), SerieNames.session);
+        log.log(Level.INFO, String.format("session.cap.requested.%s.measure", type), SerieNames.session);
+        log.log(Level.INFO, String.format("session.cap.provided.%s.measure", type), SerieNames.session);
         write(srep.build(), req.build(), prov.build());
     }
 

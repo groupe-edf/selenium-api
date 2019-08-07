@@ -24,7 +24,7 @@ class NodeReporter extends BaseSeleniumReporter {
     protected void report() {
         log.log(Level.INFO, String.format("Reporting: node.%s.measure", SerieNames.utilization));
 
-        Point point = Point.measurement("disk").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+        Point point = Point.measurement(String.format("node.%s.measure", SerieNames.utilization)).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                 .field("host", remoteHostName).field("used", proxy.getTotalUsed()).field("total", proxy.getMaxNumberOfConcurrentTestSessions())
                 .field("normalized", proxy.getResourceUsageInPercent()).build();
         write(point);

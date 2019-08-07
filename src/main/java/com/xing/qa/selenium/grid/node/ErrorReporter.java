@@ -1,6 +1,7 @@
 package com.xing.qa.selenium.grid.node;
 
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Point;
@@ -22,7 +23,8 @@ class ErrorReporter extends BaseSeleniumReporter {
 
     @Override
     protected void report() {
-        Point point = Point.measurement("disk").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+    	log.log(Level.INFO, String.format("node.errors", SerieNames.node_errors));
+        Point point = Point.measurement("node.errors").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                 .field("host", remoteHostName).field("error", exception.getClass().getName()).field("message", exception.getMessage()).build();
         write(point);
     }

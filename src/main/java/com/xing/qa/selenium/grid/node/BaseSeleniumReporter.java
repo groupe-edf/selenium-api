@@ -1,5 +1,6 @@
 package com.xing.qa.selenium.grid.node;
 
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +20,7 @@ public abstract class BaseSeleniumReporter implements Runnable {
     protected final Logger log = Logger.getLogger(getClass().getName());
     private final String database;
     private final InfluxDB influxdb;
+   
 
     public BaseSeleniumReporter(String remoteHostName, InfluxDB influxdb, String database) {
         this.remoteHostName = remoteHostName;
@@ -38,7 +40,7 @@ public abstract class BaseSeleniumReporter implements Runnable {
     protected abstract void report();
 
     protected void write(Point... points) {
-        BatchPoints batchPoints = BatchPoints.database(database).points(points).retentionPolicy("default")
+        BatchPoints batchPoints = BatchPoints.database(database).points(points).retentionPolicy("autogen")
                 .consistency(ConsistencyLevel.ANY).build();
         influxdb.write(batchPoints);
     }
