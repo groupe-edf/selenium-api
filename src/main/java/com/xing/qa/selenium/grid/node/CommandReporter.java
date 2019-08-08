@@ -39,7 +39,7 @@ class CommandReporter extends BaseSeleniumReporter {
         if (esk != null) {
             sessionKey = esk.getKey();
         }
-        log.log(Level.INFO, String.format((String.format("session.cmd.%s.measure",type)), SerieNames.command));    
+        log.log(Level.INFO, String.format((String.format("session.cmd.%s.measure",type)), SerieNames.command));        
         Point point = Point.measurement(String.format("session.cmd.%s.measure",type)).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                 .field("host", Objects.toString(remoteHostName,"")).field("ext_key",Objects.toString(sessionKey, "")).field("int_key", Objects.toString(session.getInternalKey(),""))
                 .field("forwarding", Objects.toString(session.isForwardingRequest(),"")).field("orphaned", Objects.toString(session.isOrphaned(),""))

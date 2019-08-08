@@ -3,6 +3,7 @@ package com.xing.qa.selenium.grid.node;
 import static java.lang.String.format;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -11,6 +12,7 @@ import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
 import org.openqa.grid.internal.ExternalSessionKey;
 import org.openqa.grid.internal.TestSession;
+import org.yaml.snakeyaml.emitter.ScalarAnalysis;
 
 /**
  * Session Reporter
@@ -44,14 +46,22 @@ class SessionReporter extends BaseSeleniumReporter {
         final Long inactivityTime = session.getInactivityTime();
         final long time = System.currentTimeMillis();
         if (ReportType.timeout != type) {
-            srep.time(time, TimeUnit.MILLISECONDS).field("host", remoteHostName).field("type", type.toString())
-                    .field("ext_key", sessionKey).field("int_key", session.getInternalKey())
-                    .field("forwarding", forwardingRequest).field("orphaned", orphaned)
+            srep.time(time, TimeUnit.MILLISECONDS)
+            		.field("host", 	  Objects.toString(remoteHostName, ""))
+            		.field("type", 	  Objects.toString(type.toString(), ""))
+                    .field("ext_key", Objects.toString(sessionKey, ""))
+                    .field("int_key", Objects.toString(session.getInternalKey(),""))
+                    .field("forwarding", forwardingRequest)
+                    .field("orphaned",   orphaned)
                     .field("inactivity", inactivityTime);
         } else {
-            srep.time(time, TimeUnit.MILLISECONDS).field("host", remoteHostName).field("type", type.toString())
-                    .field("ext_key", sessionKey).field("int_key", session.getInternalKey())
-                    .field("forwarding", forwardingRequest).field("orphaned", orphaned)
+            srep.time(time, TimeUnit.MILLISECONDS)
+            		.field("host", 	  Objects.toString(remoteHostName, ""))
+            		.field("type", 	  Objects.toString(type.toString(), ""))
+                    .field("ext_key", Objects.toString(sessionKey, ""))
+                    .field("int_key", Objects.toString(session.getInternalKey(),""))
+                    .field("forwarding", forwardingRequest)
+                    .field("orphaned",   orphaned)
                     .field("inactivity", inactivityTime)
                     .field("browser_starting", String.valueOf(session.getInternalKey() == null));
         }
@@ -59,24 +69,31 @@ class SessionReporter extends BaseSeleniumReporter {
         Builder req = Point.measurement(format("session.cap.requested.%s.measure", type));
 
         for (Map.Entry<String, Object> rcap : session.getRequestedCapabilities().entrySet()) {
-            req.time(time, TimeUnit.MILLISECONDS).field("host", remoteHostName).field("ext_key", sessionKey)
-                    .field("int_key", session.getInternalKey()).field("forwarding", forwardingRequest)
-                    .field("orphaned", orphaned).field("inactivity", inactivityTime).field("capability", rcap.getKey())
-                    .field("val", rcap.getValue());
+            req.time(time, TimeUnit.MILLISECONDS).field("host", Objects.toString(remoteHostName, "")).field("ext_key", Objects.toString(sessionKey, ""))
+                    .field("int_key", Objects.toString(session.getInternalKey(),"")).field("forwarding", forwardingRequest)
+                    .field("orphaned", orphaned).field("inactivity", Objects.toString(inactivityTime,"")).field("capability", Objects.toString(rcap.getKey(), ""))
+                    .field("val", Objects.toString(rcap.getValue(), ""));
         }
 
         Builder prov = Point.measurement(format("session.cap.provided.%s.measure", type));
 
         for (Map.Entry<String, Object> scap : session.getSlot().getCapabilities().entrySet()) {
-            req.time(time, TimeUnit.MILLISECONDS).field("host", remoteHostName).field("ext_key", sessionKey)
-                    .field("int_key", session.getInternalKey()).field("forwarding", forwardingRequest)
-                    .field("orphaned", orphaned).field("inactivity", inactivityTime).field("capability", scap.getKey())
-                    .field("val", scap.getValue());
+            prov.time(time, TimeUnit.MILLISECONDS).field("host", Objects.toString(remoteHostName,"")).field("ext_key", Objects.toString(sessionKey,""))
+                    .field("int_key", Objects.toString(session.getInternalKey(), "")).field("forwarding", forwardingRequest)
+                    .field("orphaned", orphaned).field("inactivity", inactivityTime).field("capability", Objects.toString(scap.getKey(), ""))
+                    .field("val", Objects.toString(scap.getValue(), ""));
         }
-        log.log(Level.INFO, String.format("session.event.measuree", type), SerieNames.session);
+        
+        log.log(Level.INFO, String.format("session.event.measure", type), SerieNames.session);
         log.log(Level.INFO, String.format("session.cap.requested.%s.measure", type), SerieNames.session);
         log.log(Level.INFO, String.format("session.cap.provided.%s.measure", type), SerieNames.session);
+        
+        
+        
+        
+        
         write(srep.build(), req.build(), prov.build());
+
     }
 
 }
