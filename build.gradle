@@ -34,7 +34,3 @@ jar {
         exclude "META-INF/*.RSA"
     }
 }
-//task wrapper(type: Wrapper) {
-//    gradleVersion = '5.5'
-//    distributionUrl = "http://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip";
-//}
